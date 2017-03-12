@@ -1,4 +1,6 @@
 set nocompatible              " be iMproved, required
+set number
+
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
@@ -11,6 +13,13 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'maksimr/vim-jsbeautify'
+Plugin 'becaning/vimdoccn'
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'Lokaltog/vim-powerline'
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+Plugin 'suan/vim-instant-markdown'
 
 " The following are examples of different formats supported.
 " Keep Plugin commands between vundle#begin/end.
@@ -48,6 +57,10 @@ let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
 
 
+filetype plugin on
+runtime macros/matchit.vim
+
+
 "jsbeautify 配置
 map <Leader>ff :call JsBeautify()<cr>
 " or
@@ -64,44 +77,107 @@ autocmd FileType css noremap <buffer> <Leader>ff :call CSSBeautify()<cr>
 "for svg
 au BufNewFile,BufRead *.svg setf svg 
 
+"for py
+au BufNewFile *.py :call PYskeleton()
 
+function! PYskeleton()
+    call setline(1,"#!/usr/bin/env python")
+    call setline(2,"#-*- coding: utf-8 -*-")
+    call setline(3,'"""')
+    call setline(4,printf("FileName:%s",expand("%:t")))
+    call setline(5,"DESC:")
+    call setline(6,'"""')
+    call setline(7,'')
+    call setline(8,'')
+    call setline(9,'if __name__ == "__main__":')
+    call cursor(5,5)
+endfunction
 
-"常规设置
-"显示行数，设置软回车和缩进还有语法
-set number
-set shiftwidth=4
-set softtabstop=4
-set tabstop=4
-set expandtab
-set autoindent
+"格式花JSON
+command! JsonFormat :execute '%!python -m json.tool'
+  \ | :execute '%!python -c "import re,sys;chr=__builtins__.__dict__.get(\"unichr\", chr);sys.stdout.write(re.sub(r\"\\\\u[0-9a-f]{4}\", lambda x: chr(int(\"0x\" + x.group(0)[2:], 16)).encode(\"utf-8\"), sys.stdin.read()))"'
+  \ | :set ft=javascript
+  \ | :1
+nmap <F4> :JsonFormat<CR> 
 
-"开启语法高亮
+"powerline配置
+let g:Powerline_symbols='unicode'
+"let g:Powerline_symbols='fancy'
+set encoding=utf-8 
+set laststatus=2
+set guifont="PowerlineSymbols.otf"
+
+"配色
 syntax enable
-"允许用指定语法高亮配色方案替换默认方案
-syntax on
+set background=dark
+colorscheme solarized
+let g:solarized_termcolors=256
+"gui字体设置
+set guifont=Monospace\ 14
 
-"编码设置
-set encoding=utf-8
-set fileencoding=utf-8
-set termencoding=utf-8
+"其他配置
+set history=1000         
+"检测文件类型  
+filetype on  
+" 针对不同的文件类型采用不同的缩进格式    
+filetype indent on                 
+"允许插件    
+filetype plugin on  
+"启动自动补全  
+filetype plugin indent on  
+"兼容vi模式。去掉讨厌的有关vi一致性模式，避免以前版本的一些bug和局限  
+"set nocompatible        
+set autoread          " 文件修改之后自动载入。  
+" 取消备份。  
+set nobackup  
+set nowb  
+set noswapfile  
 
-"基于缩进或语法进行代码折叠
-set foldmethod=indent
-set foldmethod=syntax
 
-"启动vim时关闭折叠代码
-set nofoldenable
+"贴时保持格式  
+"set paste 
 
-"显示光标当前位置
-set ruler
-"高亮显示当前行/列
-set cursorline
-set cursorcolumn
+"显示行号：  
+set number  
+"为方便复制，用<F6>开启/关闭行号显示:  
+nnoremap <F6> :set nonumber!<CR>:set foldcolumn=0<CR>  
 
-"高亮显示搜索结果
-set hlsearch
-colorscheme koehler
-set gfn=Droid\ Sans\ Mono\ 12
+"括号配对情况  
+set showmatch  
+" How many tenths of a second to blink when matching brackets  
+set mat=2  
 
-"设置vim历史记录
-set history=200
+" 代码折叠  
+set foldenable  
+" 折叠方法  
+" manual    手工折叠  
+" indent    使用缩进表示折叠  
+" expr      使用表达式定义折叠  
+" syntax    使用语法定义折叠  
+" diff      对没有更改的文本进行折叠  
+" marker    使用标记进行折叠, 默认标记是 {{{ 和 }}}  
+set foldmethod=syntax  
+" 在左侧显示折叠的层次  
+"set foldcolumn=4  
+
+set tabstop=4                " 设置Tab键的宽度        [等同的空格个数]  
+set sta
+set shiftwidth=4  
+set expandtab                " 将Tab自动转化成空格    [需要输入真正的Tab键时，使用 Ctrl+V + Tab]  
+" 按退格键时可以一次删掉 4 个空格  
+set softtabstop=4  
+
+
+set ai "Auto indent  
+set si "Smart indent  
+
+"显示当前的行号列号：  
+set ruler  
+"在状态栏显示正在输入的命令  
+set showcmd  
+
+" Set 7 lines to the cursor - when moving vertically using j/k 上下滚动,始终在中间  
+set so=7    
+set cursorline              " 突出显示当前行
+
+
