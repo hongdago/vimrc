@@ -1,10 +1,10 @@
+"设置终端颜色位数
 set t_Co=256
 "去掉vi的一致性
 set nocompatible
 "显示行号
 set number
-"设置字体
-"set guifont=Monaco:h13
+
 "开启语法高亮
 syntax on
 "打开filetype
@@ -19,10 +19,6 @@ set showmatch
 set encoding=utf-8
 set fileencodings=utf-8,ucs-bom,GBK
 
-"显示当前的行号列号：  
-"set ruler  
-"在状态栏显示正在输入的命令  
-"set showcmd  
 
 "高亮标记当前行和当前列
 set cursorcolumn
@@ -30,6 +26,7 @@ set cursorline
 
 set autoindent
 set smartindent
+
 
 "Vundle配置
 set nocompatible              " be iMproved, required
@@ -43,31 +40,12 @@ call vundle#begin()
 
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'yongqiangren/vimdoccn'
+
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'Chiel92/vim-autoformat'
+Plugin 'w0rp/ale'
 Plugin 'mattn/emmet-vim'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'suan/vim-instant-markdown'
-Plugin 'vim-syntastic/syntastic'
-Plugin 'scrooloose/nerdtree'
-" The following are examples of different formats supported.
-" Keep Plugin commands between vundle#begin/end.
-" plugin on GitHub repo
-"Plugin 'tpope/vim-fugitive'
-" plugin from http://vim-scripts.org/vim/scripts.html
-" Plugin 'L9'
-" Git plugin not hosted on GitHub
-"Plugin 'git://git.wincent.com/command-t.git'
-" git repos on your local machine (i.e. when working on your own plugin)
-"Plugin 'file:///home/gmarik/path/to/plugin'
-" The sparkup vim script is in a subdirectory of this repo called vim.
-" Pass the path to set the runtimepath properly.
-"Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
-" Install L9 and avoid a Naming conflict if you've already installed a
-" different version somewhere else.
-" Plugin 'ascenator/L9', {'name': 'newL9'}
+Plugin 'Chiel92/vim-autoformat'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -84,50 +62,37 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
-"airline setting
+"vim-airline 配置
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline#extensions#tabline#formatter = 'default'
+
 let g:airline_powerline_fonts = 1
 if !exists('g:airline_symbols')
 	  let g:airline_symbols = {}
 endif
-let g:airline_symbols.space = "\ua0"
-
-"YouCompleteMe配置
-let g:ycm_python_binary_path = "/usr/bin/python3"
-"在注释输入中也能补全
-let g:ycm_complete_in_comments = 1
-"在字符串输入中也能补全
-let g:ycm_complete_in_strings = 1
-"注释和字符串中的文字也会被收入补全
-let g:ycm_collect_identifiers_from_comments_and_strings = 1
-
-"netrw配置
-"let g:netrw_browse_split=4
-"let g:netrw_preview   = 1
-"let g:netrw_liststyle = 3
-"let g:netrw_winsize   = 70
-"let g:netrw_altv = 1
-
-"nerdtree 配置
-map <C-n> :NERDTreeToggle<CR>
-"vim不指定具体文件打开是，自动使用nerdtree
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-"vim指定打开是目录时，自动使用nerdtreee
-autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
-"当vim中没有其他文件，值剩下nerdtree的时候，自动关闭窗口
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 
-"syntastic配置
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_quiet_messages = { "!level":  "errors" }
-let g:syntastic_python_checkers = ['pylint']
+"ale配置
+
+"Set this variable to 1 to fix files when you save them.
+let g:ale_fix_on_save = 1
+
+" Enable completion where available.
+let g:ale_completion_enabled = 1
+
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
+let g:ale_set_loclist = 0
+let g:ale_set_quickfix = 1
+let g:ale_open_list = 1
+
 
 "python with virtualenv support
 py << EOF
@@ -172,46 +137,29 @@ function! PYskeleton()
     call cursor(5,5)
 endfunction
 
-"按键设置
-"<F4> 格式花JSON
-command! JsonFormat :execute '%!python -m json.tool'
-  \ | :execute '%!python -c "import re,sys;chr=__builtins__.__dict__.get(\"unichr\", chr);sys.stdout.write(re.sub(r\"\\\\u[0-9a-f]{4}\", lambda x: chr(int(\"0x\" + x.group(0)[2:], 16)).encode(\"utf-8\"), sys.stdin.read()))"'
-  \ | :set ft=javascript
-  \ | :1
-nmap <F4> :JsonFormat<CR> 
-
-"自动执行<F5>
-map <F5> :call CompileRunGcc()<CR>
-func! CompileRunGcc()
-	exec "w"
-	if &filetype == 'c'
-		exec "!g++ % -o %<"
-		exec "!time ./%<"
-	elseif &filetype == 'cpp'
-		exec "!g++ % -o %<"
-		exec "!time ./%<"
-	elseif &filetype == 'java'
-		exec "!javac %"
-		exec "!time java %<"
-	elseif &filetype == 'sh'
-		:!time bash %
-	elseif &filetype == 'python'
-		exec "!clear"
-		exec "!time python %"
-	elseif &filetype == 'html'
-		exec "!firefox % &"
-	"elseif &filetype == 'mkd'
-	"	exec "!~/.vim/markdown.pl % > %.html &"
-	"	exec "!firefox %.html &"
-	endif
-endfunc
-
 
 "为方便复制，用<F6>开启/关闭行号显示:  
 nnoremap <F6> :set nonumber!<CR>:set foldcolumn=0<CR>  
-let g:autoformat_autoindent = 0
-let g:autoformat_retab = 0
-let g:autoformat_remove_trailing_spaces = 0
 
-"自动格式化
-nnoremap <F7> :Autoformat<CR>
+"autoformat 配置
+noremap <F7> :Autoformat<CR>
+
+"格式化选中的JSON串
+vmap <F4> :!python3 -m json.tool \| python3 -c "import sys; sys.stdout.write(sys.stdin.read().encode().decode('unicode_escape'))" <CR>
+
+if exists('$TMUX')
+  set term=screen-256color
+endif
+
+"latex-suite配置
+let g:tex_flavor='latex'
+let g:Tex_FormatDependency_pdf = ''
+
+let g:Tex_CompileRule_pdf = 'xelatex -interaction=nonstopmode $*'
+let g:Tex_ViewRule_pdf = 'okular'
+let g:Tex_DefaultTargetFormat = 'pdf'
+
+set grepprg=grep\ -nH\ $*
+au Filetype tex set sw=2
+au Filetype tex set iskeyword+=:
+au Filetype tex set winaltkeys=no
